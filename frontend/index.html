@@ -160,6 +160,10 @@
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 System Online
             </div>
+            <button id="btn-bumble" onclick="launchBumble()"
+                class="hidden md:flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg shadow-purple-500/20 transition-all active:scale-95">
+                <i class="fas fa-eye"></i> Launch Bumble
+            </button>
             <button onclick="window.location.href='/'" class="text-slate-400 hover:text-white transition-colors">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
@@ -263,8 +267,12 @@
                 </button>
                 <button
                     class="tab-btn px-4 h-full border-b-2 border-transparent text-sm font-medium text-slate-400 hover:text-white transition-all"
-                    data-tab="ai-chat">
                     <i class="fas fa-comments mr-2"></i>AI Assistant
+                </button>
+                <button id="githubTab"
+                    class="tab-btn px-4 h-full border-b-2 border-transparent text-sm font-medium text-slate-400 hover:text-white transition-all"
+                    data-tab="github">
+                    <i class="fab fa-github mr-2"></i>GitHub Integration
                 </button>
             </div>
 
@@ -288,6 +296,90 @@
 
                     <!-- Results -->
                     <div id="review-content" class="hidden space-y-6">
+
+                        <!-- Quality Score Section -->
+                        <div id="quality-score-container" class="glass-panel p-6 rounded-xl hidden">
+                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-tachometer-alt text-blue-400"></i> Code Quality Score
+                            </h3>
+
+                            <div class="flex flex-col md:flex-row gap-8 items-center">
+                                <!-- Main Grade Gauge -->
+                                <div class="relative w-40 h-40 flex items-center justify-center">
+                                    <svg class="w-full h-full transform -rotate-90">
+                                        <circle cx="80" cy="80" r="70" stroke="currentColor" stroke-width="12"
+                                            fill="transparent" class="text-slate-800" />
+                                        <circle id="score-circle" cx="80" cy="80" r="70" stroke="currentColor"
+                                            stroke-width="12" fill="transparent"
+                                            class="text-blue-500 transition-all duration-1000 ease-out"
+                                            stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span id="grade-letter" class="text-5xl font-bold text-white">A</span>
+                                        <span id="score-number" class="text-sm text-slate-400 mt-1">0/100</span>
+                                    </div>
+                                </div>
+
+                                <!-- Category Cards -->
+                                <div class="flex-1 w-full grid grid-cols-2 gap-4">
+                                    <!-- Security -->
+                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs text-slate-400 uppercase">Security</span>
+                                            <span id="score-security-val" class="text-sm font-bold text-white">0</span>
+                                        </div>
+                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                            <div id="bar-security"
+                                                class="bg-red-500 h-1.5 rounded-full transition-all duration-1000"
+                                                style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Performance -->
+                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs text-slate-400 uppercase">Performance</span>
+                                            <span id="score-performance-val"
+                                                class="text-sm font-bold text-white">0</span>
+                                        </div>
+                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                            <div id="bar-performance"
+                                                class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000"
+                                                style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Maintainability -->
+                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs text-slate-400 uppercase">Maintainability</span>
+                                            <span id="score-maintainability-val"
+                                                class="text-sm font-bold text-white">0</span>
+                                        </div>
+                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                            <div id="bar-maintainability"
+                                                class="bg-purple-500 h-1.5 rounded-full transition-all duration-1000"
+                                                style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Readability -->
+                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs text-slate-400 uppercase">Readability</span>
+                                            <span id="score-readability-val"
+                                                class="text-sm font-bold text-white">0</span>
+                                        </div>
+                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                            <div id="bar-readability"
+                                                class="bg-emerald-500 h-1.5 rounded-full transition-all duration-1000"
+                                                style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Severity Cards -->
                         <div class="grid grid-cols-4 gap-4">
                             <div class="glass-panel p-4 rounded-xl border-l-4 border-red-500">
@@ -471,300 +563,96 @@
                     </div>
                 </div>
 
+                <!-- Tab: GitHub Integration -->
+                <div id="githubContent" class="hidden tab-content p-8 h-full overflow-y-auto custom-scrollbar">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="bg-gray-800/50 glass-panel rounded-xl p-8 border border-slate-700">
+                            <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                <i class="fab fa-github text-3xl"></i>
+                                Review GitHub Pull Request
+                            </h2>
+
+                            <!-- Token Setup -->
+                            <div
+                                class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-lg p-6 mb-6">
+                                <h3 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                                    🔑 GitHub Personal Access Token
+                                </h3>
+                                <p class="text-sm text-gray-400 mb-4">
+                                    Get your token from: <a href="https://github.com/settings/tokens/new?scopes=repo"
+                                        target="_blank" class="text-blue-400 hover:underline">GitHub Settings →
+                                        Developer → Tokens</a>
+                                    <br />Required scopes: <code
+                                        class="bg-gray-700 px-2 py-1 rounded text-xs">repo</code>
+                                </p>
+                                <div class="flex gap-3">
+                                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                                        class="flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none border border-slate-600"
+                                        onchange="validateGitHubToken()" />
+                                    <button onclick="validateGitHubToken()"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all font-medium">
+                                        Validate
+                                    </button>
+                                </div>
+                                <div id="tokenStatus" class="mt-3 text-sm h-5"></div>
+                            </div>
+
+                            <!-- PR URL Input -->
+                            <div class="mb-8">
+                                <label class="block text-white font-semibold mb-2">Pull Request URL</label>
+                                <input type="text" id="prUrl" placeholder="https://github.com/owner/repo/pull/123"
+                                    class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none border border-slate-600" />
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <h4 class="text-slate-400 text-sm font-semibold mb-3 uppercase tracking-wider">Analysis
+                                Options</h4>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <button onclick="analyzePR(false)"
+                                    class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-4 rounded-lg font-semibold transition-all border border-slate-600 flex items-center justify-center gap-3 group">
+                                    <span class="text-2xl group-hover:scale-110 transition-transform">👀</span>
+                                    <span>Review PR (Preview)</span>
+                                </button>
+                                <button onclick="analyzePR(true)"
+                                    class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-4 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-3 group">
+                                    <span class="text-2xl group-hover:scale-110 transition-transform">💬</span>
+                                    <span>Review & Post Comment</span>
+                                </button>
+                            </div>
+
+                            <h4 class="text-slate-400 text-sm font-semibold mb-3 uppercase tracking-wider mt-6">Auto-Fix
+                                Options</h4>
+                            <div class="grid grid-cols-2 gap-4 mb-8">
+                                <button onclick="autofixPR(false)"
+                                    class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-4 rounded-lg font-semibold transition-all border border-slate-600 flex items-center justify-center gap-3 group">
+                                    <span class="text-2xl group-hover:scale-110 transition-transform">🔧</span>
+                                    <span>Auto-Fix (Preview)</span>
+                                </button>
+                                <button onclick="autofixPR(true)"
+                                    class="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-6 py-4 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-3 group">
+                                    <span class="text-2xl group-hover:scale-110 transition-transform">🚀</span>
+                                    <span>Auto-Fix & Commit</span>
+                                </button>
+                            </div>
+
+                            <!-- Results -->
+                            <div id="prReviewResults" class="hidden border-t border-slate-700 pt-8">
+                                <h3 class="text-xl font-semibold text-white mb-4">Results</h3>
+                                <div id="prReviewContent"
+                                    class="bg-slate-900/50 rounded-lg p-6 border border-slate-700 min-h-[100px]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script>
-        // Tab Switching
-        const tabs = document.querySelectorAll('.tab-btn');
-        const contents = document.querySelectorAll('.tab-content');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => {
-                    t.classList.remove('border-blue-500', 'text-white', 'active');
-                    t.classList.add('border-transparent', 'text-slate-400');
-                });
-                tab.classList.remove('border-transparent', 'text-slate-400');
-                tab.classList.add('border-blue-500', 'text-white', 'active');
-
-                const target = tab.dataset.tab;
-                contents.forEach(content => {
-                    if (content.id === `tab-${target}`) {
-                        content.classList.remove('hidden');
-                    } else {
-                        content.classList.add('hidden');
-                    }
-                });
-            });
-        });
-
-        // App Logic
-        const API_URL = 'http://127.0.0.1:8000/api';
-
-        const codeInput = document.getElementById('code-input');
-        const langSelect = document.getElementById('language-select');
-        const loader = document.getElementById('loader');
-
-        document.getElementById('clear-code').addEventListener('click', () => {
-            codeInput.value = '';
-            codeInput.focus();
-        });
-
-        function getFocusAreas() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            return Array.from(checkboxes).map(cb => cb.value);
-        }
-
-        async function postData(endpoint, data) {
-            loader.classList.remove('hidden');
-            try {
-                const response = await fetch(`${API_URL}/${endpoint}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-                return await response.json();
-            } catch (error) {
-                console.error("API Error:", error);
-                alert("An error occurred. Check console for details.");
-                return null;
-            } finally {
-                loader.classList.add('hidden');
-            }
-        }
-
-        // Review Logic
-        document.getElementById('btn-review').addEventListener('click', async () => {
-            const code = codeInput.value;
-            if (!code.trim()) return alert("Please enter some code first.");
-
-            // Switch to review tab
-            document.querySelector('[data-tab="review"]').click();
-
-            const data = await postData('review', {
-                code: code,
-                language: langSelect.value,
-                focus_areas: getFocusAreas()
-            });
-
-            if (data) {
-                document.getElementById('review-empty').classList.add('hidden');
-                document.getElementById('review-content').classList.remove('hidden');
-
-                // Update counts
-                document.getElementById('count-critical').textContent = data.critical ? data.critical.length : 0;
-                document.getElementById('count-high').textContent = data.high ? data.high.length : 0;
-                document.getElementById('count-medium').textContent = data.medium ? data.medium.length : 0;
-                document.getElementById('count-low').textContent = data.low ? data.low.length : 0;
-
-                // Update text
-                document.getElementById('review-summary').textContent = data.summary || "No summary provided.";
-
-                // Render Markdown
-                document.getElementById('review-markdown').innerHTML = marked.parse(data.raw_review || "");
-            }
-        });
-
-        // Rewrite Logic
-        document.getElementById('btn-rewrite').addEventListener('click', async () => {
-            const code = codeInput.value;
-            if (!code.trim()) return alert("Please enter some code first.");
-
-            // Switch to rewrite tab
-            document.querySelector('[data-tab="rewrite"]').click();
-
-            const data = await postData('rewrite', {
-                code: code,
-                language: langSelect.value,
-                focus_areas: getFocusAreas()
-            });
-
-            if (data) {
-                document.getElementById('rewrite-empty').classList.add('hidden');
-                document.getElementById('rewrite-content').classList.remove('hidden');
-                document.getElementById('improvements-panel').classList.remove('hidden');
-
-                // Update Code display
-                document.getElementById('original-code-display').textContent = code;
-
-                // Clean up markdown code blocks if present in extracted code (just in case the regex in backend wasn't perfect, or for display safety)
-                // The backend tries to extract, but let's assume it sends clean code or we handle it.
-                // If the backend sends markdown code blocks, we might want to strip them for the highlighting block which expects raw code usually, 
-                // OR marked.js handles it. Highlight.js expects raw text.
-                // Let's rely on backend's extraction or simple cleaning.
-                let cleanCode = data.rewritten_code;
-                if (cleanCode.startsWith('```')) {
-                    const matches = cleanCode.match(/```(?:\w+)?\n([\s\S]*?)```/);
-                    if (matches && matches[1]) cleanCode = matches[1];
-                }
-
-                const rewrittenBlock = document.getElementById('rewritten-code-display');
-                rewrittenBlock.textContent = cleanCode;
-
-                // Highlight
-                hljs.highlightElement(document.getElementById('original-code-display'));
-                hljs.highlightElement(rewrittenBlock);
-
-                // Improvements
-                // If data.improvements is the full text, we render it.
-                document.getElementById('improvements-list').innerHTML = marked.parse(data.improvements || "");
-            }
-        });
-
-        function copyText(elementId) {
-            const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                // Could show a toast here
-                const btn = event.currentTarget;
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check mr-1"></i>Copied';
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                }, 2000);
-            });
-        }
-
-        // --- AI Chat Logic ---
-        const chatInput = document.getElementById('chat-input');
-        const chatHistory = document.getElementById('chat-history');
-        const typingIndicator = document.getElementById('typing-indicator');
-        const sendChatBtn = document.getElementById('send-chat');
-        const clearChatBtn = document.getElementById('clear-chat');
-
-        let lastReviewSummary = "";
-
-        // Hook into review success to capture summary
-        const originalReviewClick = document.getElementById('btn-review').onclick; // This might be null because we used addEventListener.
-        // We can't easily hook into the existing event listener without modifying it or adding a new one that runs after.
-        // Since we modified the code above, I will just capture the data when postData returns in the existing listeners if I could, 
-        // but I didn't modify the existing listeners in the previous steps.
-        // I will add a new listener to the buttons to update the global validation state if needed, 
-        // OR better, I will assume the user has run a review if the UI shows it.
-        // Actually, the requirements say "Each message sent should include... Latest review summary (if exists)".
-        // I need to store it. I'll modify the existing listeners OR just patch the `postData` wrapper or add a side-effect.
-        // Since I can't easily patch the *inside* of the existing listeners without replacing them entirely,
-        // I will add a mechanism to read the current summary from the DOM when sending a message.
-
-        function getLatestReviewSummary() {
-            const summaryEl = document.getElementById('review-summary');
-            return summaryEl ? summaryEl.textContent : "";
-        }
-
-        function appendMessage(role, text) {
-            const div = document.createElement('div');
-            div.className = `flex gap-4 ${role === 'user' ? 'flex-row-reverse' : ''}`;
-
-            const avatar = role === 'ai'
-                ? `<div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0">🤖</div>`
-                : `<div class="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center shrink-0"><i class="fas fa-user"></i></div>`;
-
-            const bubbleClass = role === 'ai'
-                ? 'bg-slate-800/80 border border-slate-700 rounded-tl-none'
-                : 'bg-blue-600 text-white rounded-tr-none';
-
-            // Parse Markdown for AI, text for User
-            const content = role === 'ai' ? marked.parse(text) : text.replace(/\n/g, '<br>');
-
-            div.innerHTML = `
-                ${avatar}
-                <div class="${bubbleClass} p-4 rounded-2xl max-w-[80%] text-sm ${role === 'ai' ? 'text-slate-300 markdown-body' : ''}">
-                    ${content}
-                    ${role === 'ai' ? `
-                    <div class="mt-2 flex justify-end">
-                        <button class="text-xs text-slate-500 hover:text-white transition-colors" onclick="navigator.clipboard.writeText(this.parentElement.parentElement.innerText).then(() => alert('Copied!'))">
-                            <i class="fas fa-copy mr-1"></i>Copy
-                        </button>
-                    </div>` : ''}
-                </div>
-            `;
-
-            chatHistory.appendChild(div);
-            // Highlight code blocks in the new message
-            if (role === 'ai') {
-                div.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
-            }
-            scrollToBottom();
-        }
-
-        function scrollToBottom() {
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
-
-        function showTyping() {
-            typingIndicator.classList.remove('hidden');
-            scrollToBottom();
-        }
-
-        function hideTyping() {
-            typingIndicator.classList.add('hidden');
-        }
-
-        async function handleSendMessage() {
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            // Clear input
-            chatInput.value = '';
-
-            // User Message
-            appendMessage('user', message);
-
-            // Show Typing
-            showTyping();
-
-            // Prepare Context
-            const context = {
-                message: message,
-                language: langSelect.value,
-                context_code: codeInput.value,
-                review_summary: getLatestReviewSummary()
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(context)
-                });
-
-                if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-                const data = await response.json();
-
-                hideTyping();
-                appendMessage('ai', data.reply);
-
-            } catch (error) {
-                console.error("Chat Error:", error);
-                hideTyping();
-                appendMessage('ai', "⚠️ Sorry, I encountered an error creating a response.");
-            }
-        }
-
-        sendChatBtn.addEventListener('click', handleSendMessage);
-
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleSendMessage();
-            }
-        });
-
-        clearChatBtn.addEventListener('click', () => {
-            if (confirm("Clear chat history?")) {
-                // Keep the welcome message
-                const welcome = chatHistory.firstElementChild;
-                chatHistory.innerHTML = '';
-                chatHistory.appendChild(welcome);
-            }
-        });
-
-    </script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/github-simple.js"></script>
+    <script src="/static/js/quality-score.js"></script>
 </body>
 
 </html>
