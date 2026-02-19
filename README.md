@@ -81,3 +81,5 @@ AI-Code-Review-Agent/
 3.  **Select Focus**: Check boxes for Bugs, Security, Performance, etc.
 4.  **Review**: Click "Review Code" for a detailed report.
 5.  **Rewrite**: Click "Fix & Rewrite" to get an optimized version.
+
+---
