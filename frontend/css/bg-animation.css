@@ -1,0 +1,52 @@
+/* Header */
+.large-header {
+	position: relative;
+	width: 100%;
+	background: #222; /* solid background, removed photo */
+	overflow: hidden;
+	background-size: cover;
+	background-position: center center;
+	z-index: 1;
+}
+
+/* removed background-image (photo) from #large-header */
+
+/* ensure canvas covers the header */
+#demo-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.main-title {
+    /* title kept in CSS for safety but HTML title element was removed */
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    color: #f9f1e9;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate3d(-50%,-50%,0);
+    transform: translate3d(-50%,-50%,0);
+    pointer-events: none;
+}
+
+.demo-1 .main-title {
+    text-transform: uppercase;
+    font-size: 4.2em;
+    letter-spacing: 0.1em;
+}
+
+.main-title .thin {
+    font-weight: 200;
+}
+
+@media only screen and (max-width : 768px) {
+    .demo-1 .main-title {
+        font-size: 3em;
+    }
+}
