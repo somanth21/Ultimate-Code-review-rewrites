@@ -25,7 +25,7 @@ class RewriteRequest(BaseModel):
         return v.strip()
 
 @router.post("/rewrite")
-async def rewrite_code(request: RewriteRequest):
+def rewrite_code(request: RewriteRequest):
     """
     Rewrite code based on improvements.
     """
@@ -39,8 +39,12 @@ async def rewrite_code(request: RewriteRequest):
         )
         
         if not result.get("success", False):
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+            if result.get("error") == "rate_limit":
+                status_code = status.HTTP_429_TOO_MANY_REQUESTS
+                
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status_code=status_code,
                 detail={
                     "error": result.get("error", "unknown"),
                     "message": result.get("message", "Rewrite failed")

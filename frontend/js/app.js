@@ -256,7 +256,18 @@ async function handleSendMessage() {
 
     chatInput.value = '';
     appendMessage('user', message);
-    showTyping();
+
+    // Create a placeholder for the AI message
+    const aiMessageDiv = appendMessage('ai', '');
+    const aiContentDiv = aiMessageDiv.querySelector('.markdown-body');
+    const aiBubble = aiMessageDiv.querySelector('.bg-slate-800\\/80'); // Select the bubble
+
+    // Add typing cursor
+    const cursor = document.createElement('span');
+    cursor.className = 'inline-block w-2 h-4 bg-slate-400 ml-1 animate-pulse';
+    aiContentDiv.appendChild(cursor);
+
+    scrollToBottom();
 
     const context = {
         message: message,
@@ -273,27 +284,64 @@ async function handleSendMessage() {
         });
 
         if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-        const data = await response.json();
 
-        hideTyping();
-        appendMessage('ai', data.reply);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = "";
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            fullText += chunk;
+
+            // Update UI with partial text
+            // Helper to render markdown for partial text? 
+            // For now, just render the full text so far using marked.parse
+            // This might flicker for large texts, but marked is fast.
+            // Using requestAnimationFrame for smoother updates if needed.
+
+            aiContentDiv.innerHTML = marked.parse(fullText);
+            aiContentDiv.appendChild(cursor); // Keep cursor at end
+
+            // Highlight code blocks dynamically
+            aiContentDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+
+            scrollToBottom();
+        }
+
+        // Cleanup after stream ends
+        cursor.remove();
+
+        // Add copy button manually since we rebuilt innerHTML
+        const copyBtnDiv = document.createElement('div');
+        copyBtnDiv.className = 'mt-2 flex justify-end';
+        copyBtnDiv.innerHTML = `
+            <button class="text-xs text-slate-500 hover:text-white transition-colors" onclick="navigator.clipboard.writeText(this.parentElement.parentElement.innerText).then(() => alert('Copied!'))">
+                <i class="fas fa-copy mr-1"></i>Copy
+            </button>`;
+        aiBubble.appendChild(copyBtnDiv);
 
     } catch (error) {
         console.error("Chat Error:", error);
-        hideTyping();
-        appendMessage('ai', "⚠️ Sorry, I encountered an error creating a response.");
+        cursor.remove();
+        aiContentDiv.innerHTML += `<br><br><span class="text-red-400">⚠️ Error: ${error.message}</span>`;
     }
 }
 
-if (sendChatBtn) sendChatBtn.addEventListener('click', handleSendMessage);
+// if (sendChatBtn) sendChatBtn.addEventListener('click', handleSendMessage);
 
-if (chatInput) {
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleSendMessage();
-        }
-    });
-}
+// if (chatInput) {
+//     chatInput.addEventListener('keypress', (e) => {
+//         if (e.key === 'Enter') {
+//             handleSendMessage();
+//         }
+//     });
+// }
+// Chat logic moved to assistant.js
 
 if (clearChatBtn) {
     clearChatBtn.addEventListener('click', () => {

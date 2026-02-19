@@ -36,12 +36,13 @@ app.add_middleware(
 )
 
 # Include routers
-from routers import review, rewrite, github_simple, chat, bumble
+from routers import review, rewrite, github_simple, chat, bumble, assistant
 
 app.include_router(review.router)
 app.include_router(rewrite.router)
 app.include_router(github_simple.router)
-app.include_router(chat.router)
+# app.include_router(chat.router) # Deprecated in favor of assistant
+app.include_router(assistant.router)
 app.include_router(bumble.router)
 
 # Static files

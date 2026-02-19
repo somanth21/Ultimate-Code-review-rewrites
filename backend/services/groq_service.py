@@ -60,6 +60,44 @@ class GroqService:
             logger.error(f"Failed to initialize Groq client: {e}")
             raise
     
+    def _make_api_call(self, messages, max_retries=3, **kwargs):
+        """
+        Execute API call with exponential backoff retry logic.
+        """
+        import time
+        import random
+        
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                return self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    **kwargs
+                )
+            except RateLimitError as e:
+                last_error = e
+                wait_time = (2 ** attempt) + random.uniform(0, 1)
+                logger.warning(f"Rate limit hit. Retrying in {wait_time:.2f}s (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+            except (APIConnectionError, APIError) as e:
+                # Retry on connection errors too
+                last_error = e
+                wait_time = 1 + random.uniform(0, 1)
+                logger.warning(f"API Error: {e}. Retrying in {wait_time:.2f}s")
+                time.sleep(wait_time)
+                
+        # If we exhausted retries, verify if it was a rate limit
+        if isinstance(last_error, RateLimitError):
+            raise last_error
+        
+        # Re-raise the last error
+        if last_error:
+            raise last_error
+        
+        raise Exception("Unknown error during API call retries")
+
     def review_code(
         self, 
         code: str, 
@@ -131,8 +169,7 @@ Code to review:
             logger.info(f"Requesting review for {len(code)} chars of {language} code")
             
             # Call Groq API with timeout and retry logic
-            completion = self.client.chat.completions.create(
-                model=self.model,
+            completion = self._make_api_call(
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
                 max_tokens=2000,
@@ -324,8 +361,7 @@ Rewritten code:"""
         try:
             logger.info(f"Requesting rewrite for {len(code)} chars of {language} code")
             
-            completion = self.client.chat.completions.create(
-                model=self.model,
+            completion = self._make_api_call(
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.2,  # Lower temperature for more deterministic output
                 max_tokens=3000,

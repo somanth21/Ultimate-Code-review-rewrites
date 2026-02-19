@@ -45,7 +45,7 @@ class CodeReviewRequest(BaseModel):
         return v
 
 @router.post("/review")
-async def review_code(request: CodeReviewRequest):
+def review_code(request: CodeReviewRequest):
     """
     Review code and return structured feedback with quality scores.
     """
@@ -67,9 +67,14 @@ async def review_code(request: CodeReviewRequest):
                 "user_message": "Failed to complete code review. Please try again."
             }
             logger.error(f"Review failed with error: {error_detail}")
-            # Return user-friendly error
+            
+            # Return correct status code
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+            if error_detail.get("error") == "rate_limit":
+                status_code = status.HTTP_429_TOO_MANY_REQUESTS
+            
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status_code=status_code,
                 detail=error_detail
             )
             
