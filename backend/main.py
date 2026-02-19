@@ -36,7 +36,7 @@ app.add_middleware(
 )
 
 # Include routers
-from routers import review, rewrite, github_simple, chat, bumble, assistant
+from routers import review, rewrite, github_simple, chat, bumble, assistant, score
 
 app.include_router(review.router)
 app.include_router(rewrite.router)
@@ -44,6 +44,7 @@ app.include_router(github_simple.router)
 # app.include_router(chat.router) # Deprecated in favor of assistant
 app.include_router(assistant.router)
 app.include_router(bumble.router)
+app.include_router(score.router)
 
 # Static files
 # Check if frontend directory exists, if so mount it

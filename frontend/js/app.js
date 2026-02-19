@@ -93,15 +93,166 @@ async function postData(endpoint, data) {
     }
 }
 
-// Review Logic
+// ── Animated counter ──
+function animateCount(el, target) {
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 20));
+    const interval = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = current;
+        if (current >= target) clearInterval(interval);
+    }, 40);
+}
+
+// ── Safe number helper ──
+function num(x, d) { d = (d === undefined) ? 0 : d; const n = Number(x); return Number.isFinite(n) ? n : d; }
+
+// ── Animate a number from 0 → target in an element ──
+function animateValue(el, target, suffix) {
+    suffix = suffix || '';
+    target = num(target);
+    if (target === 0) { el.textContent = '0' + suffix; return; }
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 25));
+    const iv = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = current + suffix;
+        if (current >= target) clearInterval(iv);
+    }, 30);
+}
+
+// ── Show score-unavailable state ──
+function showScoreUnavailable() {
+    const container = document.getElementById('quality-score-container');
+    if (!container) return;
+    container.classList.remove('hidden');
+    const gl = document.getElementById('grade-letter');
+    const sn = document.getElementById('score-number');
+    if (gl) gl.textContent = '-';
+    if (sn) sn.textContent = '--/100';
+    ['security', 'performance', 'maintainability', 'readability'].forEach(cat => {
+        const valEl = document.getElementById(`score-${cat}-val`);
+        const bar = document.getElementById(`bar-${cat}`);
+        if (valEl) valEl.textContent = '--';
+        if (bar) bar.style.width = '0%';
+    });
+}
+
+// ── Display quality scores with animated gauge ──
+// Accepts EITHER nested format { overall_score, grade, categories: { security: {score} } }
+// OR flat format { overall, grade, security, performance, ... }
+function displayQualityScores(scores) {
+    console.log('quality_scores received:', scores);
+    if (!scores) { showScoreUnavailable(); return; }
+
+    const container = document.getElementById('quality-score-container');
+    if (!container) { console.error('Missing #quality-score-container'); return; }
+    container.classList.remove('hidden');
+
+    // Support both nested (quality_scores) and flat (review.score) overall
+    const overall = (scores.overall_score !== undefined) ? num(scores.overall_score) : num(scores.overall);
+    const grade = scores.grade || '?';
+
+    // ── SVG ring animation ──
+    const circle = document.getElementById('score-circle');
+    if (circle) {
+        const circumference = 2 * Math.PI * 70; // r=70 in HTML
+        circle.style.strokeDasharray = String(circumference);
+        circle.style.strokeDashoffset = String(circumference); // reset to 0%
+        // Update color by grade
+        const gradeColors = { A: 'text-emerald-400', B: 'text-blue-400', C: 'text-yellow-400', D: 'text-orange-400', F: 'text-red-400' };
+        ['text-emerald-400', 'text-blue-400', 'text-blue-500', 'text-yellow-400', 'text-orange-400', 'text-red-400'].forEach(cls => circle.classList.remove(cls));
+        circle.classList.add(gradeColors[grade] || 'text-blue-500');
+        // Animate ring
+        const targetOffset = circumference - (overall / 100) * circumference;
+        requestAnimationFrame(() => {
+            circle.style.transition = 'stroke-dashoffset 1.2s ease-out';
+            circle.style.strokeDashoffset = String(targetOffset);
+        });
+    } else { console.error('Missing #score-circle'); }
+
+    // ── Grade letter + overall number ──
+    const gradeLetter = document.getElementById('grade-letter');
+    const scoreNumber = document.getElementById('score-number');
+    if (gradeLetter) gradeLetter.textContent = grade;
+    if (scoreNumber) animateValue(scoreNumber, overall, '/100');
+
+    // ── Category bars with animated values ──
+    const cats = ['security', 'performance', 'maintainability', 'readability'];
+    cats.forEach((cat, i) => {
+        // Read from nested categories first, fall back to flat
+        let val = 0;
+        if (scores.categories && scores.categories[cat] && scores.categories[cat].score !== undefined) {
+            val = num(scores.categories[cat].score);
+        } else {
+            val = num(scores[cat]);
+        }
+        const bar = document.getElementById(`bar-${cat}`);
+        const valEl = document.getElementById(`score-${cat}-val`);
+        if (bar) {
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = `${val}%`; }, 150 + i * 100);
+        } else { console.error(`Missing #bar-${cat}`); }
+        if (valEl) {
+            animateValue(valEl, val);
+        } else { console.error(`Missing #score-${cat}-val`); }
+    });
+}
+
+// ── Render badges ──
+function renderBadges(badges) {
+    let container = document.getElementById('badges-container');
+    if (!container) return;
+    container.innerHTML = '';
+    (badges || []).forEach(b => {
+        const chip = document.createElement('span');
+        chip.className = 'inline-block bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-3 py-1.5 rounded-full mr-2 mb-2 animate-pulse';
+        chip.textContent = b;
+        container.appendChild(chip);
+        setTimeout(() => chip.classList.remove('animate-pulse'), 1500);
+    });
+}
+
+// ── Render severity sections ──
+function renderSections(sections) {
+    const md = document.getElementById('review-markdown');
+    if (!md) return;
+    const sevMeta = {
+        critical: { icon: '🔴', color: 'border-red-500', bg: 'bg-red-500/10' },
+        high: { icon: '🟠', color: 'border-orange-500', bg: 'bg-orange-500/10' },
+        medium: { icon: '🟡', color: 'border-yellow-500', bg: 'bg-yellow-500/10' },
+        low: { icon: '🟢', color: 'border-emerald-500', bg: 'bg-emerald-500/10' }
+    };
+    let html = '';
+    for (const [sev, meta] of Object.entries(sevMeta)) {
+        const items = sections[sev] || [];
+        if (!items.length) continue;
+        html += `<div class="mb-4"><h4 class="text-sm font-bold text-white mb-2">${meta.icon} ${sev.charAt(0).toUpperCase() + sev.slice(1)} (${items.length})</h4>`;
+        items.forEach(item => {
+            const lineTag = item.line ? `<span class="text-xs bg-slate-700 px-1.5 py-0.5 rounded text-slate-400 ml-2">L${item.line}</span>` : '';
+            html += `<div class="mb-3 p-3 rounded-lg ${meta.bg} border-l-4 ${meta.color}">
+                <div class="font-semibold text-white text-sm">${item.title || 'Issue'}${lineTag}</div>
+                <p class="text-slate-300 text-xs mt-1">${item.detail || ''}</p>
+                ${item.suggestion ? `<p class="text-emerald-400 text-xs mt-1">💡 ${item.suggestion}</p>` : ''}
+            </div>`;
+        });
+        html += `</div>`;
+    }
+    md.innerHTML = html || '<p class="text-slate-400">No issues found — great code!</p>';
+}
+
+// ── Review Logic ──
 const btnReview = document.getElementById('btn-review');
 if (btnReview) {
     btnReview.addEventListener('click', async () => {
         const code = codeInput.value;
         if (!code.trim()) return alert("Please enter some code first.");
 
-        // Switch to review tab
+        // Switch to review tab + disable button
         showTab('review');
+        btnReview.disabled = true;
+        const origLabel = btnReview.innerHTML;
+        btnReview.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i>Reviewing…';
 
         const data = await postData('review', {
             code: code,
@@ -110,26 +261,63 @@ if (btnReview) {
             calculate_score: true
         });
 
-        if (data) {
+        btnReview.disabled = false;
+        btnReview.innerHTML = origLabel;
+
+        if (!data) {
+            // Network / server error — postData already showed alert
+            showScoreUnavailable();
+            return;
+        }
+
+        console.log('Review response keys:', Object.keys(data));
+
+        if (data.success) {
+            const r = data.review || {};
             document.getElementById('review-empty').classList.add('hidden');
             document.getElementById('review-content').classList.remove('hidden');
 
-            // Display Scores
-            if (data.quality_scores) {
-                displayQualityScores(data.quality_scores);
+            // Animated severity counts
+            animateCount(document.getElementById('count-critical'), r.counts?.critical || 0);
+            animateCount(document.getElementById('count-high'), r.counts?.high || 0);
+            animateCount(document.getElementById('count-medium'), r.counts?.medium || 0);
+            animateCount(document.getElementById('count-low'), r.counts?.low || 0);
+
+            // Summary
+            const summaryEl = document.getElementById('review-summary');
+            if (summaryEl) {
+                if (Array.isArray(r.summary)) {
+                    summaryEl.innerHTML = '<ul class="list-disc list-inside space-y-1">' +
+                        r.summary.map(s => `<li>${s}</li>`).join('') + '</ul>';
+                } else {
+                    summaryEl.textContent = r.summary || 'No summary available.';
+                }
             }
 
-            // Update counts
-            document.getElementById('count-critical').textContent = data.critical ? data.critical.length : 0;
-            document.getElementById('count-high').textContent = data.high ? data.high.length : 0;
-            document.getElementById('count-medium').textContent = data.medium ? data.medium.length : 0;
-            document.getElementById('count-low').textContent = data.low ? data.low.length : 0;
+            // Badges
+            renderBadges(r.badges);
 
-            // Update text
-            document.getElementById('review-summary').textContent = data.summary || "No summary provided.";
+            // XP
+            const xpEl = document.getElementById('xp-display');
+            if (xpEl) xpEl.textContent = `⚡ XP to gain if fixed: ${r.xp || 0}`;
 
-            // Render Markdown
-            document.getElementById('review-markdown').innerHTML = marked.parse(data.raw_review || "");
+            // ── Quality Scores: prefer top-level quality_scores, fallback to review.score ──
+            const qs = data.quality_scores || r.score || null;
+            if (qs) {
+                displayQualityScores(qs);
+            } else {
+                showScoreUnavailable();
+            }
+
+            // Detailed sections
+            renderSections(r.sections || {});
+        } else {
+            // API returned error payload
+            document.getElementById('review-empty').classList.add('hidden');
+            document.getElementById('review-content').classList.remove('hidden');
+            showScoreUnavailable();
+            const md = document.getElementById('review-markdown');
+            if (md) md.innerHTML = `<div class="bg-red-500/10 border border-red-500/30 p-4 rounded-lg text-red-300">${data.message || 'Review failed.'}</div>`;
         }
     });
 }

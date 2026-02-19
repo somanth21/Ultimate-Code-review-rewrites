@@ -241,6 +241,14 @@
                         class="flex-1 py-2.5 px-4 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-medium shadow-lg shadow-purple-500/20 transition-all active:scale-95 flex items-center justify-center gap-2">
                         <span>Fix & Rewrite</span>
                     </button>
+                    <button id="btn-score"
+                        class="flex-1 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-lg text-white font-medium shadow-lg shadow-cyan-500/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Code Score</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -275,6 +283,11 @@
                     data-tab="github">
                     <i class="fab fa-github mr-2"></i>GitHub Integration
                 </button>
+                <button
+                    class="tab-btn px-4 h-full border-b-2 border-transparent text-sm font-medium text-slate-400 hover:text-white transition-all"
+                    data-tab="score">
+                    <i class="fas fa-chart-bar mr-2"></i>Code Score
+                </button>
             </div>
 
             <!-- Content Area -->
@@ -298,86 +311,14 @@
                     <!-- Results -->
                     <div id="review-content" class="hidden space-y-6">
 
-                        <!-- Quality Score Section -->
-                        <div id="quality-score-container" class="glass-panel p-6 rounded-xl hidden">
-                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                                <i class="fas fa-tachometer-alt text-blue-400"></i> Code Quality Score
-                            </h3>
 
-                            <div class="flex flex-col md:flex-row gap-8 items-center">
-                                <!-- Main Grade Gauge -->
-                                <div class="relative w-40 h-40 flex items-center justify-center">
-                                    <svg class="w-full h-full transform -rotate-90">
-                                        <circle cx="80" cy="80" r="70" stroke="currentColor" stroke-width="12"
-                                            fill="transparent" class="text-slate-800" />
-                                        <circle id="score-circle" cx="80" cy="80" r="70" stroke="currentColor"
-                                            stroke-width="12" fill="transparent"
-                                            class="text-blue-500 transition-all duration-1000 ease-out"
-                                            stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round" />
-                                    </svg>
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span id="grade-letter" class="text-5xl font-bold text-white">A</span>
-                                        <span id="score-number" class="text-sm text-slate-400 mt-1">0/100</span>
-                                    </div>
-                                </div>
-
-                                <!-- Category Cards -->
-                                <div class="flex-1 w-full grid grid-cols-2 gap-4">
-                                    <!-- Security -->
-                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="text-xs text-slate-400 uppercase">Security</span>
-                                            <span id="score-security-val" class="text-sm font-bold text-white">0</span>
-                                        </div>
-                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
-                                            <div id="bar-security"
-                                                class="bg-red-500 h-1.5 rounded-full transition-all duration-1000"
-                                                style="width: 0%"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Performance -->
-                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="text-xs text-slate-400 uppercase">Performance</span>
-                                            <span id="score-performance-val"
-                                                class="text-sm font-bold text-white">0</span>
-                                        </div>
-                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
-                                            <div id="bar-performance"
-                                                class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000"
-                                                style="width: 0%"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Maintainability -->
-                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="text-xs text-slate-400 uppercase">Maintainability</span>
-                                            <span id="score-maintainability-val"
-                                                class="text-sm font-bold text-white">0</span>
-                                        </div>
-                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
-                                            <div id="bar-maintainability"
-                                                class="bg-purple-500 h-1.5 rounded-full transition-all duration-1000"
-                                                style="width: 0%"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Readability -->
-                                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="text-xs text-slate-400 uppercase">Readability</span>
-                                            <span id="score-readability-val"
-                                                class="text-sm font-bold text-white">0</span>
-                                        </div>
-                                        <div class="w-full bg-slate-700 rounded-full h-1.5">
-                                            <div id="bar-readability"
-                                                class="bg-emerald-500 h-1.5 rounded-full transition-all duration-1000"
-                                                style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <!-- Gamified Badges & XP -->
+                        <div class="glass-panel p-4 rounded-xl flex flex-wrap items-center gap-2">
+                            <div id="badges-container" class="flex-1 flex flex-wrap gap-2">
+                                <span class="text-xs text-slate-500 italic">Badges appear after review</span>
+                            </div>
+                            <div id="xp-display"
+                                class="text-xs font-bold text-amber-400 bg-amber-400/10 px-3 py-1.5 rounded-full">
                             </div>
                         </div>
 
@@ -662,6 +603,136 @@
                     </div>
                 </div>
 
+                <!-- Tab: Code Score -->
+                <div id="tab-score"
+                    class="tab-content h-full hidden flex flex-col p-6 overflow-y-auto custom-scrollbar">
+
+                    <!-- Empty State -->
+                    <div id="score-empty" class="flex flex-col items-center justify-center h-full text-slate-500">
+                        <svg class="w-16 h-16 mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10" />
+                        </svg>
+                        <p class="text-lg">Click "Code Score" to evaluate your code</p>
+                    </div>
+
+                    <!-- Score Content -->
+                    <div id="score-content" class="hidden space-y-6">
+
+                        <!-- Row 1: Ring + Summary -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                            <!-- Overall Score Ring -->
+                            <div class="glass-panel rounded-xl p-6 flex flex-col items-center justify-center">
+                                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
+                                    Overall Quality
+                                </h3>
+                                <div class="relative w-40 h-40">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
+                                        <!-- Background circle -->
+                                        <circle cx="80" cy="80" r="70" stroke="#334155" stroke-width="12"
+                                            fill="transparent" />
+                                        <!-- Animated score circle -->
+                                        <circle id="score-ring-circle" cx="80" cy="80" r="70" stroke="#3B82F6"
+                                            stroke-width="12" fill="transparent" stroke-dasharray="439.82"
+                                            stroke-dashoffset="439.82" stroke-linecap="round"
+                                            style="transition: stroke-dashoffset 1000ms ease-out, stroke 500ms ease;" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span id="score-value" class="text-5xl font-bold text-white">0</span>
+                                        <span class="text-sm text-slate-400">/ 100</span>
+                                    </div>
+                                </div>
+                                <!-- Grade Badge -->
+                                <div id="score-grade"
+                                    class="mt-4 text-2xl font-bold px-4 py-1 rounded-full bg-slate-700 text-white border-2 border-slate-600">
+                                    -
+                                </div>
+                            </div>
+
+                            <!-- Reasoning + Complexity -->
+                            <div class="glass-panel rounded-xl p-6 md:col-span-2 flex flex-col">
+                                <h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-3">
+                                    Analysis Summary
+                                </h3>
+                                <p id="score-reasoning"
+                                    class="text-slate-300 text-sm leading-relaxed flex-1 whitespace-pre-wrap overflow-y-auto max-h-48">
+                                </p>
+                                <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-700">
+                                    <div class="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+                                        <span class="text-xs text-slate-500 block mb-1">Time Complexity</span>
+                                        <span id="time-complexity"
+                                            class="text-lg font-mono font-bold text-emerald-400">O(?)</span>
+                                    </div>
+                                    <div class="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+                                        <span class="text-xs text-slate-500 block mb-1">Space Complexity</span>
+                                        <span id="space-complexity"
+                                            class="text-lg font-mono font-bold text-purple-400">O(?)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Metric Bars -->
+                        <div class="glass-panel rounded-xl p-6">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-6">
+                                Detailed Metrics
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                <!-- Performance -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-slate-300">⚡ Performance</span>
+                                        <span id="perf-score-val" class="text-white font-bold">0</span>
+                                    </div>
+                                    <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div id="perf-bar" class="h-full bg-blue-500 rounded-full"
+                                            style="width:0%; transition: width 1000ms ease;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Security -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-slate-300">🔒 Security</span>
+                                        <span id="sec-score-val" class="text-white font-bold">0</span>
+                                    </div>
+                                    <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div id="sec-bar" class="h-full bg-green-500 rounded-full"
+                                            style="width:0%; transition: width 1000ms ease;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Readability -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-slate-300">📖 Readability</span>
+                                        <span id="read-score-val" class="text-white font-bold">0</span>
+                                    </div>
+                                    <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div id="read-bar" class="h-full bg-yellow-500 rounded-full"
+                                            style="width:0%; transition: width 1000ms ease;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Maintainability -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-slate-300">🔧 Maintainability</span>
+                                        <span id="maint-score-val" class="text-white font-bold">0</span>
+                                    </div>
+                                    <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div id="maint-bar" class="h-full bg-purple-500 rounded-full"
+                                            style="width:0%; transition: width 1000ms ease;"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -671,6 +742,7 @@
     <script src="/static/js/assistant.js"></script>
     <script src="/static/js/github-simple.js"></script>
     <script src="/static/js/quality-score.js"></script>
+    <script src="/static/js/score.js"></script>
 </body>
 
 </html>
